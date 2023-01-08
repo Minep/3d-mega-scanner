@@ -1,0 +1,6 @@
+.pyenv
+**/__pycache__
+*.egg-info
+images
+**/.png
+**/weights
