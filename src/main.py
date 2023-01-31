@@ -1,6 +1,8 @@
 from scanner.Pipeline import Pipeline, PipelineStageBase, PipelineOptions
 from scanner.depth_extract.Extractor import DepthExtractLeReS
 from scanner.depth_extract.Visualize import PointCloudVisualizer, PointCloudVisualizerRT
+from scanner.depth_extract.PointCloud import PointCloudStage
+from scanner.Registration import RegistrationStage
 
 from v4l2 import GstV4L2CaptureWrap
 from video_file import OpenCVFileWrap
@@ -32,7 +34,8 @@ def main_seq():
     options = PipelineOptions(global_options)
     pipeline = GstV4L2CaptureWrap(Pipeline([
         DepthExtractLeReS(),
-        #PointCloudVisualizerRT()
+        PointCloudStage(),
+        RegistrationStage()
     ]))
 
     pipeline.initialize(options)
