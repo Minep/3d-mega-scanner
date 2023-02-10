@@ -70,10 +70,10 @@ class DepthExtractLeReS(PipelineStageBase):
         depth_scale_1 = pred_depth_norm - shift_1.item()
 
         # recover focal
-        # focal_scale_2 = refine_focal(depth_scale_1, predicted_focal_1, self.__focal_model, u0=cam_u0, v0=cam_v0)
-        # predicted_focal_2 = predicted_focal_1 / focal_scale_2.item()
+        focal_scale_2 = refine_focal(depth_scale_1, predicted_focal_1, self.__focal_model, u0=cam_u0, v0=cam_v0)
+        predicted_focal_2 = predicted_focal_1 / focal_scale_2.item()
 
-        return shift_1, depth_scale_1
+        return shift_1, depth_scale_1, predicted_focal_2
 
     def __scale_torch(self, img):
         """
@@ -96,10 +96,11 @@ class DepthExtractLeReS(PipelineStageBase):
     def execute(self, in_obj):
         rgb_c = in_obj[:, :, ::-1].copy()
         A_resize = cv2.resize(rgb_c, (448, 448))
+        sz = (in_obj.shape[1] // 4, in_obj.shape[0] // 4)
 
         img_torch = self.__scale_torch(A_resize)[None, :, :, :]
         pred_depth = self.__depth_model.inference(img_torch).cpu().numpy().squeeze()
-        pred_depth_ori = cv2.resize(pred_depth, (in_obj.shape[1] // 2, in_obj.shape[0] // 2))
-        _, depth_scaled = self.__recover_shift(in_obj.shape, pred_depth_ori)
-        # plt.imsave("depth.png", pred_depth_ori, cmap='rainbow')
-        return depth_scaled
+        pred_depth_ori = cv2.resize(pred_depth, sz)
+        _ori = cv2.resize(rgb_c, sz)
+        _, depth_scaled, f = self.__recover_shift(sz, pred_depth_ori)
+        return (depth_scaled, _ori, f)

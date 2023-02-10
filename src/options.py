@@ -12,5 +12,5 @@ global_options = {
     },
     "focal_len": 270,
     "capture_dev": "/dev/video0",
-    "fps": 10
+    "fps": 2
 }

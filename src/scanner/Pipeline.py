@@ -4,11 +4,15 @@ class PipelineStageBase:
 
     def initialize(self, options):
         self._opts = options
+        self._frame_num = 0
     
     def execute(self, in_obj):
         raise NotImplementedError()
     
     def cleanup(self):
+        pass
+
+    def tick(self):
         pass
 
 class Pipeline(PipelineStageBase):
@@ -25,6 +29,10 @@ class Pipeline(PipelineStageBase):
         for stages in self.stages:
             prev_in = stages.execute(prev_in)
         return prev_in
+
+    def tick(self):
+        for stages in self.stages:
+            stages.tick()
 
 class PipelineOptions:
     def __init__(self, opts_dict) -> None:
